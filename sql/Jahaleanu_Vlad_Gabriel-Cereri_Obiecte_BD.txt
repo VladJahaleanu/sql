@@ -1,0 +1,148 @@
+
+--1.Afisati specificul restaurantelor in care s-au facut comenzi mai mari de 400 de lei dupa 2020
+--si numele complet al clientilor care au facut aceste comenzi
+-- functie pe sir de caractere, join pe >4 tabele, functie pe data calendaristica
+
+select concat(concat(c.prenume, ' '), c.nume) as "Nume client", m.specific as "Specific restaurant"
+from meniu m
+join locatie l on m.meniu_id = l.meniu_id
+join sala s on l.locatie_id = s.locatie_id
+join masa ma on s.sala_id = ma.sala_id
+join client c on ma.masa_id = c.masa_id
+join comanda co on c.client_id = co.client_id
+where to_char(co.data_comanda, 'YYYY') >= 2020 and co.valoare >= 400;
+
+--2.Afisati numele clientilor, categoria comenzilor facute de acestia inainte de 2020 si id-ul comenzilor.
+--Categoriile sunt: "Comanda mica" <=99
+--                  "Comanda medie" >99 && <=299
+--                  "Comanda mare" >=300
+--case, order by
+
+select c.nume || ' ' || c.prenume as "Nume client", co.comanda_id,
+case 
+when co.valoare between 0 and 99 then
+'Comanda mica'
+when co.valoare between 100 and 299 then
+'Comanda medie' else 'Comanda mare'
+end as "Categorie comanda"
+from client c
+join comanda co on c.client_id = co.client_id
+where to_char(co.data_comanda, 'YYYY') < 2020
+order by 2;
+
+
+--3.Afisati totalul incasarilor locatiei din Bucuresti.
+--functie pe sir de caractere, functie grup
+
+select sum(co.valoare) as "Total incasari Bucuresti"
+from comanda co 
+join client c on co.client_id = c.client_id
+join masa m on c.masa_id = m.masa_id
+join sala s on s.sala_id = m.sala_id
+join locatie l on s.locatie_id = l.locatie_id
+where lower(l.oras) = 'bucuresti';
+
+
+--4.Afisati numarul total de comenzi in functie de oras, excluzand orasul Cluj.
+--group by, having, count
+
+select l.oras as "Oras", count(co.valoare) as "Numar comenzi"
+from locatie l, comanda co, client c, masa m, sala s
+where co.client_id = c.client_id
+and c.masa_id = m.masa_id
+and s.sala_id = m.sala_id
+and s.locatie_id = l.locatie_id
+group by l.oras
+having upper(l.oras) not like '%CLUJ%' ;
+
+--5. Afisati vechimea tuturor comenzilor, numele, email-ul si id-ul clientilor care le-au efectuat.
+-- Daca sunt mai noi de un an => comanda noua
+-- Daca sunt intre unu si doi ani => comanda intermediara
+-- Daca sunt mai vechi => comanda veche
+--nvl, decode, functie pe data calendaristica
+
+select co.client_id, c.nume || ' cu email-ul ' || nvl(c.email, 'n/a') as "Nume si email client",
+decode(trunc((months_between(sysdate, co.data_comanda)-1)/12), 0, 'comanda noua',
+                                                               1, 'comanda intermediara', 
+                                                               'comanda veche') as "Vechime comanda"
+from client c, comanda co
+where c.client_id = co.client_id
+order by 2;
+
+
+--6.Afiseaza toti chelnerii cu salariu mai mic decat media salariala a chelnerilor care lucreaza in sala cu id-ul 400.
+--subcerere nesincronizata
+
+select a.nume, a.prenume, a.salariu
+from angajat a, chelner cc
+where a.angajat_id = cc.angajat_id
+and a.salariu < (select avg(aa.salariu)
+                    from angajat aa, chelner c, sala s, lucreaza l
+                    where aa.angajat_id = c.angajat_id
+                    and c.angajat_id = l.angajat_id
+                    and l.sala_id = s.sala_id
+                    and s.sala_id = 400);
+                    
+                    
+
+--7.Afiseaza angajatii cu salariul mai mare decat media salariilor din sala in care lucreaza
+--subcerere sincronizata
+
+select distinct a.nume, a.prenume, a.salariu
+from angajat a
+join locatie l on a.locatie_id = l.locatie_id
+join sala s on l.locatie_id = s.locatie_id
+where a.salariu > (select avg(aa.salariu)
+                    from angajat aa, locatie ll, sala ss
+                    where aa.locatie_id = ll.locatie_id
+                    and ll.locatie_id = ss.locatie_id
+                    and ss.sala_id = s.sala_id);
+                    
+
+--afisati salariile mai mici decat media
+
+with 
+medie as (select avg(salariu) as salariuMediu from angajat),
+unitar as (select salariu as salariuSimplu from angajat)
+select salariuSimplu from unitar, medie where salariuSimplu < salariuMediu;
+
+
+-- EX 12
+
+update ANGAJAT
+set salariu = (select max(salariu) from ANGAJAT)
+where angajat_id = 3;
+select * from angajat;
+
+
+update MENIU
+set specific = (select specific from meniu where specific = 'italian')
+where specific = 'chinezesc';
+
+
+
+update COMANDA
+set marime_comanda = ( select co.marime_comanda
+                        from comanda co, client c
+                        where co.client_id = c.client_id
+                        and c.client_id = 614)
+where client_id = 612;
+                        
+rollback;
+
+-- EX 13
+
+create sequence seq_meniu
+start with 206
+increment by 1
+maxvalue 209
+nocycle
+nocache;
+insert into meniu values(seq_meniu.nextval, '&specific');
+
+select * from meniu;
+
+rollback;
+
+
+

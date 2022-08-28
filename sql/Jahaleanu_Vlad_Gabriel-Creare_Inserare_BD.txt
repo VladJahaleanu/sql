@@ -1,0 +1,370 @@
+CREATE TABLE MENIU(
+meniu_id NUMBER(5) NOT NULL PRIMARY KEY,
+specific VARCHAR2(20) NOT NULL
+);
+describe MENIU;
+
+CREATE TABLE DISTRIBUITOR(
+  distribuitor_id NUMBER(5) NOT NULL PRIMARY KEY,
+  nume_distribuitor VARCHAR2(20) NOT NULL,
+  numar_depozite NUMBER(5) NOT NULL
+);
+
+describe DISTRIBUITOR;
+
+CREATE TABLE LOCATIE(
+  locatie_id NUMBER(5) NOT NULL PRIMARY KEY,
+  meniu_id NUMBER(5) NOT NULL,
+  distribuitor_id NUMBER(5) NOT NULL,
+  oras VARCHAR2(20) NOT NULL,
+  numar_sali NUMBER(5) NOT NULL,
+  CONSTRAINT fk_meniu FOREIGN KEY (meniu_id) REFERENCES MENIU(meniu_id),
+  CONSTRAINT fk_distrib FOREIGN KEY (distribuitor_id) REFERENCES DISTRIBUITOR(distribuitor_id)
+);
+DESCRIBE LOCATIE;
+
+CREATE TABLE SALA(
+  sala_id NUMBER(5) NOT NULL PRIMARY KEY,
+  locatie_id NUMBER(5) NOT NULL,
+  nr_mese NUMBER(5) NOT NULL,
+  CONSTRAINT fk_locatie FOREIGN KEY (locatie_id) REFERENCES LOCATIE(locatie_id)
+);
+describe SALA;
+
+CREATE TABLE MASA(
+  masa_id NUMBER(5) NOT NULL PRIMARY KEY,
+  sala_id NUMBER(5) NOT NULL,
+  capacitate_masa NUMBER(5) NOT NULL,
+  CONSTRAINT fk_sala FOREIGN KEY (sala_id) REFERENCES SALA(sala_id)
+);
+describe MASA;
+
+CREATE TABLE CLIENT(
+  client_id NUMBER(5) NOT NULL PRIMARY KEY,
+  masa_id NUMBER(5) NOT NULL,
+  nume VARCHAR2(25) NOT NULL,
+  prenume VARCHAR2(25) NOT NULL,
+  email VARCHAR2(50),
+  telefon VARCHAR2(10) NOT NULL,
+  CONSTRAINT fk_masa FOREIGN KEY (masa_id) REFERENCES MASA(masa_id)
+);
+describe CLIENT;
+
+CREATE TABLE COMANDA(
+  comanda_id NUMBER(5) NOT NULL PRIMARY KEY,
+  client_id NUMBER(5) NOT NULL,
+  valoare NUMBER(5) NOT NULL,
+  marime_comanda NUMBER(3) NOT NULL,
+  modalitate_plata VARCHAR2(5) NOT NULL,
+  data_comanda DATE DEFAULT sysdate,
+  CONSTRAINT fk_client FOREIGN KEY (client_id) REFERENCES CLIENT(client_id)
+);
+describe COMANDA;
+
+CREATE TABLE ANGAJAT(
+  angajat_id NUMBER(5) NOT NULL PRIMARY KEY,
+  locatie_id NUMBER(5) NOT NULL,
+  nume VARCHAR2(25) NOT NULL,
+  prenume VARCHAR2(25) NOT NULL,
+  email VARCHAR2(50),
+  telefon VARCHAR2(10) NOT NULL,
+  salariu NUMBER(7) NOT NULL,
+  data_angajarii DATE DEFAULT sysdate,
+  CONSTRAINT fk_locatie2 FOREIGN KEY (locatie_id) REFERENCES LOCATIE(locatie_id)
+);
+describe ANGAJAT;
+
+CREATE TABLE MANAGER(
+  angajat_id NUMBER(5) NOT NULL PRIMARY KEY,
+  CONSTRAINT fk_angajat FOREIGN KEY (angajat_id) REFERENCES ANGAJAT(angajat_id),
+  studii VARCHAR2(20)
+);
+describe MANAGER;
+
+CREATE TABLE BUCATAR(
+  angajat_id NUMBER(5) NOT NULL PRIMARY KEY,
+  CONSTRAINT fk_angajat1 FOREIGN KEY (angajat_id) REFERENCES ANGAJAT(angajat_id),
+  specializare VARCHAR2(20)
+);
+describe BUCATAR;
+
+
+CREATE TABLE CHELNER(
+  angajat_id NUMBER(5) NOT NULL PRIMARY KEY,
+  CONSTRAINT fk_angajat2 FOREIGN KEY (angajat_id) REFERENCES ANGAJAT(angajat_id)
+);
+describe CHELNER;
+
+CREATE TABLE INGRIJITOR(
+  angajat_id NUMBER(5) NOT NULL PRIMARY KEY,
+  CONSTRAINT fk_angajat3 FOREIGN KEY (angajat_id) REFERENCES ANGAJAT(angajat_id),
+  sala_id NUMBER(5) NOT NULL,
+  CONSTRAINT fk_sala2 FOREIGN KEY (sala_id) REFERENCES SALA(sala_id)
+);
+describe INGRIJITOR;
+
+CREATE TABLE PAZNIC(
+  angajat_id NUMBER(5) NOT NULL PRIMARY KEY,
+  CONSTRAINT fk_angajat4 FOREIGN KEY (angajat_id) REFERENCES ANGAJAT(angajat_id),
+  tura NUMBER(2) NOT NULL
+);
+describe PAZNIC;
+
+CREATE TABLE LUCREAZA(
+  angajat_id NUMBER(5) NOT NULL,
+  CONSTRAINT fk_ang FOREIGN KEY (angajat_id) REFERENCES CHELNER(angajat_id),
+  sala_id NUMBER(5) NOT NULL,
+  CONSTRAINT fk_sala3 FOREIGN KEY (sala_id) REFERENCES SALA(sala_id),
+  PRIMARY KEY(angajat_id, salaid)
+);
+describe LUCREAZA;
+
+commit;
+  
+  
+
+
+insert into MENIU values(200, 'italian');
+insert into MENIU values(201, 'grecesc');
+insert into MENIU values(202, 'chinezesc');
+insert into MENIU values(203, 'romanesc');
+insert into MENIU values(204, 'pescaresc');
+insert into MENIU values(205, 'turcesc');
+
+select * from meniu;
+
+insert into DISTRIBUITOR values(300, 'Tarrell', 3);
+insert into DISTRIBUITOR values(301, 'Avicola', 5);
+insert into DISTRIBUITOR values(302, 'Optimeat', 2);
+insert into DISTRIBUITOR values(303, 'Cristim', 7);
+insert into DISTRIBUITOR values(304, 'Bonduelle', 1);
+insert into DISTRIBUITOR values(305, 'Marisan', 3);
+insert into DISTRIBUITOR values(306, 'Fishco', 2);
+
+select * from distribuitor;
+
+commit;
+
+insert into LOCATIE values(100, 200, 300, 'Bucuresti', 2);
+insert into LOCATIE values(101, 201, 302, 'Iasi', 1);
+insert into LOCATIE values(102, 203, 305, 'Pitesti', 1);
+insert into LOCATIE values(103, 204, 306, 'Constanta', 2);
+insert into LOCATIE values(104, 205, 300, 'Cluj', 1);
+insert into LOCATIE values(105, 202, 304, 'Oradea', 3);
+
+select * from locatie;
+
+insert into ANGAJAT values(1, 100, 'Gica', 'Popescu', 'gpopescu@gmail.com', '0729113517', '7000', to_date('01-01-2000', 'dd-mm-yyyy'));
+insert into ANGAJAT values(2, 101, 'Andrei', 'Neagu', 'andneagu@gmail.com', '0759167517', '6000', to_date('03-06-2001', 'dd-mm-yyyy'));
+insert into ANGAJAT values(3, 102, 'Florin', 'Potcoveanu', 'fpot@gmail.com', '0735123517', '5500', to_date('28-05-2002', 'dd-mm-yyyy'));
+insert into ANGAJAT values(4, 103, 'Radu', 'Alexandru', 'radualex@yahoo.com', '0725884625', '6000', to_date('15-05-2001', 'dd-mm-yyyy'));
+insert into ANGAJAT values(5, 104, 'Pop', 'Simone', 'pops@hotmail.com', '0738153517', '5800', to_date('21-01-2004', 'dd-mm-yyyy'));
+insert into ANGAJAT values(6, 105, 'Marius', 'Aurel', 'mariusa@yahoo.com', '0755153517', '5300', to_date('12-12-2005', 'dd-mm-yyyy'));
+insert into MANAGER values(1, 'licenta');
+insert into MANAGER values(2, 'doctorat');
+insert into MANAGER values(3, 'licenta');
+insert into MANAGER values(4, 'master');
+insert into MANAGER values(5, 'licenta');
+insert into MANAGER values(6, 'bacalaureat');
+select * from angajat;
+
+
+
+select * from manager;
+
+insert into ANGAJAT values(7, 100, 'Nicolae', 'Mihai', 'nicmih@gmail.com', '0724567517', '3500', to_date('02-01-2000', 'dd-mm-yyyy'));
+insert into ANGAJAT values(8, 101, 'Marian', 'Andrei', 'mandrei@hotmail.com', '0712653517', '3000', to_date('04-06-2001', 'dd-mm-yyyy'));
+insert into ANGAJAT values(9, 102, 'Dan', 'Aurica', 'danaurica@gmail.com', '0722133519', '3800', to_date('29-05-2002', 'dd-mm-yyyy'));
+insert into ANGAJAT values(10, 103, 'Ion', 'Dragos', 'dragos@yahoo.com', '0758989333', '4000', to_date('16-05-2001', 'dd-mm-yyyy'));
+insert into ANGAJAT values(11, 104, 'Popovici', 'Mihai', 'vmp@gmail.com', '0722133514', '3000', to_date('22-01-2004', 'dd-mm-yyyy'));
+insert into ANGAJAT values(12, 105, 'Popica', 'Alexandru', 'popica@gmail.com', '0723453519', '3350', to_date('13-12-2005', 'dd-mm-yyyy'));
+insert into ANGAJAT values(31, 100, 'Dicu', 'Alexandru', NULL, '0723477755', '3200', to_date('19-12-2006', 'dd-mm-yyyy'));
+insert into ANGAJAT values(32, 101, 'Sandu', 'George', NULL, '0733478854', '3150', to_date('25-01-2009', 'dd-mm-yyyy'));
+insert into ANGAJAT values(33, 102, 'Norocea', 'Razvan', NULL, '0723227752', '2800', to_date('29-11-2010', 'dd-mm-yyyy'));
+insert into ANGAJAT values(34, 103, 'Lupuleac', 'Alexandru', NULL, '0733477733', '3830', to_date('19-12-2006', 'dd-mm-yyyy'));
+insert into ANGAJAT values(35, 104, 'Mocanu', 'Horia', NULL, '0755477788', '2200', to_date('28-06-2009', 'dd-mm-yyyy'));
+insert into ANGAJAT values(36, 105, 'Stan', 'Ion', NULL, '0766677756', '3200', to_date('12-04-2008', 'dd-mm-yyyy'));
+insert into BUCATAR values(7, 'Paste');
+insert into BUCATAR values(8, 'Salate');
+insert into BUCATAR values(9, 'Desert');
+insert into BUCATAR values(10, 'Peste');
+insert into BUCATAR values(11, 'Shaorma');
+insert into BUCATAR values(12, 'Carne');
+insert into BUCATAR values(31, 'Carne');
+insert into BUCATAR values(32, 'Carne');
+insert into BUCATAR values(33, 'Desert');
+insert into BUCATAR values(34, 'Carne');
+insert into BUCATAR values(35, 'Salate');
+insert into BUCATAR values(36, 'Supe');
+
+select * from bucatar;
+
+insert into ANGAJAT values(13, 100, 'Istrate', 'Andrei', 'adnreiii@gmail.com', '0723455569', '2350', to_date('05-01-2000', 'dd-mm-yyyy'));
+insert into ANGAJAT values(14, 101, 'Ionica', 'Teodor', 'ththth@yahoo.com', '0756783519', '2550', to_date('08-06-2001', 'dd-mm-yyyy'));
+insert into ANGAJAT values(15, 102, 'Manole', 'Alexandru', 'malone@gmail.com', '0754353512', '3050', to_date('13-12-2002', 'dd-mm-yyyy'));
+insert into ANGAJAT values(16, 103, 'Bantescu', 'Matei', 'bantebines@hotmail.com', '0798763516', '3350', to_date('17-05-2001', 'dd-mm-yyyy'));
+insert into ANGAJAT values(17, 104, 'Radu', 'Mihnea', 'rmihnea@gmail.com', '0723409870', '2575', to_date('13-02-2004', 'dd-mm-yyyy'));
+insert into ANGAJAT values(18, 105, 'Popica', 'Alexandru', 'popica@gmail.com', '0723453519', '3350', to_date('13-12-2005', 'dd-mm-yyyy'));
+insert into ANGAJAT values(37, 100, 'Luis', 'Gabriel', NULL, '0762672756', '2970', to_date('12-04-2008', 'dd-mm-yyyy'));
+insert into ANGAJAT values(38, 101, 'Bratu', 'Tudor', NULL, '0763673753', '3000', to_date('19-05-2010', 'dd-mm-yyyy'));
+insert into CHELNER values(13);
+insert into CHELNER values(14);
+insert into CHELNER values(15);
+insert into CHELNER values(16);
+insert into CHELNER values(17);
+insert into CHELNER values(18);
+insert into CHELNER values(37);
+insert into CHELNER values(38);
+
+select * from chelner;
+
+insert into ANGAJAT values(19, 100, 'Voica', 'Andreea', 'voica@gmail.com', '0722131481', '2550', to_date('05-01-2000', 'dd-mm-yyyy'));
+insert into ANGAJAT values(20, 101, 'Velea', 'Bogdan', 'velea@gmail.com', '0723455569', '2280', to_date('08-06-2001', 'dd-mm-yyyy'));
+insert into ANGAJAT values(21, 102, 'Agigea', 'Mirela', 'agigea@gmail.com', '0723453385', '2100', to_date('13-12-2002', 'dd-mm-yyyy'));
+insert into ANGAJAT values(22, 103, 'Gica', 'Aurel', 'aurica@yahoo.com', '0723453671', '2105', to_date('21-05-2001', 'dd-mm-yyyy'));
+insert into ANGAJAT values(23, 104, 'Maistru', 'Alexandra', 'maistru@gmail.com', '0723457788', '2230', to_date('13-12-2004', 'dd-mm-yyyy'));
+insert into ANGAJAT values(24, 105, 'Ionescu', 'Viorel', 'vio@hotmail.com', '0723455585', '2075', to_date('19-12-2006', 'dd-mm-yyyy'));
+insert into INGRIJITOR values(19, 400);
+insert into INGRIJITOR values(20, 401);
+insert into INGRIJITOR values(21, 402);
+insert into INGRIJITOR values(22, 403);
+insert into INGRIJITOR values(23, 404);
+insert into INGRIJITOR values(24, 405);
+
+select * from ingrijitor;
+
+
+
+insert into ANGAJAT values(25, 100, 'Voronet', 'Viorel', 'viorel@gmail.com', '0723451234', '1900', to_date('19-02-2000', 'dd-mm-yyyy'));
+insert into ANGAJAT values(26, 101, 'Biban', 'Marius', 'biban@hotmail.com', '0723457585', '2075', to_date('09-06-2001', 'dd-mm-yyyy'));
+insert into ANGAJAT values(27, 102, 'Carioveanu', 'Mircea', '', '0723445580', '2115', to_date('19-12-2002', 'dd-mm-yyyy'));
+insert into ANGAJAT values(28, 103, 'Birloveanu', 'Stefan', 'birlo@yahoo.com', '0723452282', '1920', to_date('23-05-2001', 'dd-mm-yyyy'));
+insert into ANGAJAT values(29, 104, 'Ciortan', 'Alexandru', 'ciortan@hotmail.com', '0723433583', '2225', to_date('02-11-2007', 'dd-mm-yyyy'));
+insert into ANGAJAT values(30, 105, 'Serbanescu', 'Costin', 'costin@gmail.com', '0723477787', '2000', to_date('19-12-2006', 'dd-mm-yyyy'));
+insert into PAZNIC values(25, 3);
+insert into PAZNIC values(26, 1);
+insert into PAZNIC values(27, 2);
+insert into PAZNIC values(28, 1);
+insert into PAZNIC values(29, 3);
+insert into PAZNIC values(30, 2);
+
+select * from paznic;
+
+insert into SALA values(400, 100, 40);
+insert into SALA values(406, 100, 40);
+insert into SALA values(401, 101, 15);
+insert into SALA values(402, 102, 18);
+insert into SALA values(403, 103, 37);
+insert into SALA values(407, 103, 30);
+insert into SALA values(404, 104, 22);
+insert into SALA values(405, 105, 50);
+insert into SALA values(408, 105, 20);
+insert into SALA values(409, 105, 22);
+
+select * from sala;
+
+insert into MASA values(500, 400, 5);
+insert into MASA values(501, 400, 6);
+insert into MASA values(502, 400, 2);
+insert into MASA values(503, 400, 8);
+insert into MASA values(504, 400, 5);
+insert into MASA values(505, 401, 5);
+insert into MASA values(506, 406, 10);
+insert into MASA values(507, 406, 7);
+insert into MASA values(508, 401, 7);
+insert into MASA values(509, 401, 2);
+insert into MASA values(510, 402, 5);
+insert into MASA values(511, 402, 10);
+insert into MASA values(512, 402, 2);
+insert into MASA values(513, 402, 6);
+insert into MASA values(514, 403, 5);
+insert into MASA values(515, 403, 3);
+insert into MASA values(516, 404, 4);
+insert into MASA values(517, 404, 5);
+insert into MASA values(518, 404, 8);
+insert into MASA values(519, 405, 5);
+insert into MASA values(520, 405, 4);
+insert into MASA values(521, 405, 2);
+insert into MASA values(522, 406, 4);
+insert into MASA values(523, 407, 2);
+insert into MASA values(524, 407, 5);
+insert into MASA values(525, 407, 7);
+insert into MASA values(526, 407, 4);
+insert into MASA values(527, 408, 5);
+insert into MASA values(528, 408, 2);
+insert into MASA values(529, 408, 8);
+insert into MASA values(530, 408, 4);
+insert into MASA values(531, 409, 4);
+insert into MASA values(532, 409, 2);
+insert into MASA values(533, 409, 5);
+insert into MASA values(534, 409, 8);
+
+select * from masa;
+
+insert into CLIENT values(600, 500, 'Vlad', 'Jahaleanu', 'vladjaha@gmail.com', '0729113518');
+insert into CLIENT values(601, 500, 'Serban', 'Luca', 'lserban@gmail.com', '0729113123');
+insert into CLIENT values(602, 500, 'Dan', 'Camelia', 'camelia@yahoo.com', '0729221219');
+insert into CLIENT values(603, 501, 'Danci', 'Ana', 'anadanci@gmail.com', '0729113222');
+insert into CLIENT values(604, 501, 'Nita', 'Florin', 'nita@gmail.com', '0735113535');
+insert into CLIENT values(605, 502, 'Coman', 'Florinel', 'coman@hotmail.com', '0729115555');
+insert into CLIENT values(606, 502, 'Cirease', 'Sebastian', 'cirease@gmail.com', '0729113444');
+insert into CLIENT values(607, 503, 'Vladimir', 'Andrei', 'vlad@gmail.com', '0729117777');
+insert into CLIENT values(608, 503, 'Ghita', 'Lorena', 'lorena@gmail.com', '0729113599');
+insert into CLIENT values(609, 504, 'Munteanu', 'Vlad', 'munteanu@yahoo.com', '0729113888');
+insert into CLIENT values(610, 504, 'Totolea', 'Toto', 'toto@gmail.com', '0766113500');
+insert into CLIENT values(611, 505, 'Ghita', 'Aurel', 'ghita@hotmail.com', '0744113544');
+insert into CLIENT values(612, 509, 'Moldoveanu', 'Andrei', 'moldo@gmail.com', '0718113221');
+insert into CLIENT values(613, 510, 'Planta', 'Mirel', 'mirel@gmail.com', '0788664422');
+insert into CLIENT values(614, 510, 'Joacabine', 'Alex', 'joaca@gmail.com', '0788665542');
+insert into CLIENT values(615, 514, 'Superman', 'Batman', 'superman@yahoo.com', '0788664488');
+insert into CLIENT values(616, 515, 'Croitoru', 'Alexandru', NULL, '0785664485');
+insert into CLIENT values(617, 515, 'Geanta', 'Marcel', NULL, '0725664482');
+insert into CLIENT values(618, 516, 'Dragos', 'Daniel', NULL, '0785634483');
+
+select * from client;
+
+insert into COMANDA values(1000, 600, 300, 4, 'card', to_date('19-12-2020', 'dd-mm-yyyy'));
+insert into COMANDA values(1001, 600, 280, 2, 'cash',to_date(sysdate));
+insert into COMANDA values(1002, 601, 120, 3, 'card', to_date('12-06-2018', 'dd-mm-yyyy'));
+insert into COMANDA values(1003, 602, 450, 7, 'cash', to_date('09-08-2020', 'dd-mm-yyyy'));
+insert into COMANDA values(1004, 603, 315, 2, 'card', to_date('19-12-2020', 'dd-mm-yyyy'));
+insert into COMANDA values(1005, 604, 90, 2, 'card', to_date('23-02-2021', 'dd-mm-yyyy'));
+insert into COMANDA values(1006, 605, 330, 5, 'card', to_date('13-01-2021', 'dd-mm-yyyy'));
+insert into COMANDA values(1007, 606, 197, 3, 'cash', to_date(sysdate));
+insert into COMANDA values(1008, 607, 30, 1, 'card', to_date('22-12-2018', 'dd-mm-yyyy'));
+insert into COMANDA values(1009, 608, 202, 4, 'card', to_date('16-05-2020', 'dd-mm-yyyy'));
+insert into COMANDA values(1010, 609, 320, 6, 'cash', to_date('10-10-2020', 'dd-mm-yyyy'));
+insert into COMANDA values(1011, 610, 500, 11, 'card', to_date('25-12-2021', 'dd-mm-yyyy'));
+insert into COMANDA values(1012, 611, 223, 5, 'card', to_date('19-12-2020', 'dd-mm-yyyy'));
+insert into COMANDA values(1013, 612, 85, 3, 'cash', to_date('22-12-2017', 'dd-mm-yyyy'));
+insert into COMANDA values(1014, 613, 300, 4, 'card', to_date(sysdate));
+insert into COMANDA values(1015, 614, 108, 3, 'card', to_date('13-05-2016', 'dd-mm-yyyy'));
+insert into COMANDA values(1016, 615, 234, 6, 'card', to_date('22-12-2019', 'dd-mm-yyyy'));
+insert into COMANDA values(1017, 601, 500, 8, 'card', to_date('23-02-2020', 'dd-mm-yyyy'));
+insert into COMANDA values(1018, 600, 90, 2, 'card', to_date('13-05-2020', 'dd-mm-yyyy'));
+insert into COMANDA values(1019, 612, 401, 9, 'card', to_date('18-09-2021', 'dd-mm-yyyy'));
+insert into COMANDA values(1020, 613, 450, 8, 'cash', to_date('11-03-2016', 'dd-mm-yyyy'));
+insert into COMANDA values(1021, 615, 190, 4, 'cash', to_date('22-10-2020', 'dd-mm-yyyy'));
+insert into COMANDA values(1022, 616, 222, 5, 'card', to_date('13-11-2017', 'dd-mm-yyyy'));
+insert into COMANDA values(1023, 617, 83, 3, 'card', to_date('25-10-2018', 'dd-mm-yyyy'));
+insert into COMANDA values(1024, 618, 55, 1, 'card', to_date('12-07-2020', 'dd-mm-yyyy'));
+select * from comanda;
+
+commit;
+
+insert into LUCREAZA values(13, 400);
+insert into LUCREAZA values(13, 406);
+insert into LUCREAZA values(14, 401);
+insert into LUCREAZA values(15, 402);
+insert into LUCREAZA values(16, 403);
+insert into LUCREAZA values(17, 404);
+insert into LUCREAZA values(18, 408);
+insert into LUCREAZA values(18, 409);
+insert into LUCREAZA values(18, 405);
+insert into LUCREAZA values(16, 407);
+insert into LUCREAZA values(37, 400);
+insert into LUCREAZA values(38, 406);
+
+select * from lucreaza;
+
+
